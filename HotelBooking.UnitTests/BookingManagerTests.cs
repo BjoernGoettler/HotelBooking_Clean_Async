@@ -59,18 +59,16 @@ namespace HotelBooking.UnitTests
                 }
             };
             
-            mockRoomRepository.Setup(x => x.GetAllAsync()).Returns(Task.FromResult<IEnumerable<Room>>(rooms));
-            mockRoomRepository.Setup(x => x.GetAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).Returns(Task.FromResult<Room>(rooms[0]));
-            mockRoomRepository.Setup(x => x.RemoveAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).Returns(Task.CompletedTask);
+            mockRoomRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(rooms);
+            mockRoomRepository.Setup(x => x.GetAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).ReturnsAsync(rooms[0]);
+            mockRoomRepository.Setup(x => x.RemoveAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).ReturnsAsync();
 
-            mockBookingRepository.Setup(x => x.GetAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).Returns(Task.FromResult<Booking>(bookings[0]));
-            mockBookingRepository.Setup(x => x.GetAllAsync()).Returns(Task.FromResult<IEnumerable<Booking>>(bookings));
-            mockBookingRepository.Setup(x => x.AddAsync(It.IsAny<Booking>())).Returns(Task.CompletedTask);
-            mockBookingRepository.Setup(x => x.RemoveAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).Returns(Task.CompletedTask);
-            mockBookingRepository.Setup(x => x.EditAsync(It.IsAny<Booking>())).Returns(Task.CompletedTask);
+            mockBookingRepository.Setup(x => x.GetAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).ReturnsAsync(bookings[0]);
+            mockBookingRepository.Setup(x => x.GetAllAsync()).ReturnsAsync(bookings);
+            mockBookingRepository.Setup(x => x.AddAsync(It.IsAny<Booking>())).ReturnsAsync();
+            mockBookingRepository.Setup(x => x.RemoveAsync(It.IsInRange(1, 2, Moq.Range.Inclusive))).ReturnsAsync();
+            mockBookingRepository.Setup(x => x.EditAsync(It.IsAny<Booking>())).ReturnsAsync();
             
-            //bookingRepository = new FakeBookingRepository(start, end);
-            //IRepository<Room> roomRepository = new FakeRoomRepository();
             bookingManager = new BookingManager(mockBookingRepository.Object, mockRoomRepository.Object);
         }
 
