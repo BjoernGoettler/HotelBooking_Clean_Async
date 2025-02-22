@@ -2,19 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HotelBooking.Core.Interfaces;
 
 namespace HotelBooking.Core
 {
     public class BookingManager : IBookingManager
     {
-        private IRepository<Booking> bookingRepository;
-        private IRepository<Room> roomRepository;
+        private readonly IRepository<Booking> bookingRepository;
+        private readonly IRepository<Room> roomRepository;
+        private readonly IRoomAvailabilityService roomAvailabilityService;
 
         // Constructor injection
-        public BookingManager(IRepository<Booking> bookingRepository, IRepository<Room> roomRepository)
+        public BookingManager(IRepository<Booking> bookingRepository, IRepository<Room> roomRepository, IRoomAvailabilityService roomAvailabilityService)
         {
             this.bookingRepository = bookingRepository;
             this.roomRepository = roomRepository;
+            this.roomAvailabilityService = roomAvailabilityService;
         }
 
         public async Task<bool> CreateBooking(Booking booking)
@@ -42,16 +45,8 @@ namespace HotelBooking.Core
             var bookings = await bookingRepository.GetAllAsync();
             var activeBookings = bookings.Where(b => b.IsActive);
             var rooms = await roomRepository.GetAllAsync();
-            foreach (var room in rooms)
-            {
-                var activeBookingsForCurrentRoom = activeBookings.Where(b => b.RoomId == room.Id);
-                if (activeBookingsForCurrentRoom.All(b => startDate < b.StartDate &&
-                    endDate < b.StartDate || startDate > b.EndDate && endDate > b.EndDate))
-                {
-                    return room.Id;
-                }
-            }
-            return -1;
+            
+            return roomAvailabilityService.FindAvailableRoom(startDate, endDate, rooms, activeBookings);
         }
 
         public async Task<List<DateTime>> GetFullyOccupiedDates(DateTime startDate, DateTime endDate)
