@@ -15,10 +15,13 @@ namespace HotelBooking.UnitTests
         private IBookingManager bookingManager;
         private Mock<IRepository<Room>> mockRoomRepository;
         private Mock<IRepository<Booking>> mockBookingRepository;
+        private DateTime start = DateTime.Today.AddDays(10);
+        private DateTime end = DateTime.Today.AddDays(20);
+        private List<Customer> customers;
+        private List<Booking> bookings;
+        
 
         public BookingManagerTests(){
-            DateTime start = DateTime.Today.AddDays(10);
-            DateTime end = DateTime.Today.AddDays(20);
             mockRoomRepository = new Mock<IRepository<Room>>();
             mockBookingRepository = new Mock<IRepository<Booking>>();
             
@@ -27,7 +30,7 @@ namespace HotelBooking.UnitTests
                 new Room { Id = 1, Description = "Room 1" },
                 new Room { Id = 2, Description = "Room 2" }
             };
-            var customers = new List<Customer>
+            customers = new List<Customer>
             {
                 new Customer
                 {
@@ -43,7 +46,7 @@ namespace HotelBooking.UnitTests
                 }
             };
 
-            var bookings = new List<Booking>
+            bookings = new List<Booking>
             {
                 new Booking
                 {
@@ -53,15 +56,6 @@ namespace HotelBooking.UnitTests
                     IsActive = true,
                     CustomerId = customers[0].Id,
                     RoomId = 1
-                },
-                new Booking
-                {
-                    Id = 2,
-                    StartDate = start,
-                    EndDate = end,
-                    IsActive = true,
-                    CustomerId = customers[1].Id,
-                    RoomId = 2
                 }
             };
             
@@ -79,7 +73,35 @@ namespace HotelBooking.UnitTests
             //IRepository<Room> roomRepository = new FakeRoomRepository();
             bookingManager = new BookingManager(mockBookingRepository.Object, mockRoomRepository.Object);
         }
-        
+
+        [Fact]
+        public async Task CreateBooking_ReturnsTrue()
+        {
+            //Arrange
+            var booking = new Booking
+            {
+                Id = 2,
+                StartDate = start,
+                EndDate = end,
+                IsActive = true,
+                CustomerId = customers[1].Id,
+                RoomId = 2
+            };
+            //Act
+            var result = await bookingManager.CreateBooking(booking);
+            //Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task GetFullyOccupiedRooms_ReturnsEmptyListOfFullyOccupiedRooms()
+        {
+            // Arrange
+            // Act
+            var result = await bookingManager.GetFullyOccupiedDates(start, end);
+            // Assert
+            Assert.Empty(result);
+        }
         
         [Theory]
         [InlineData("13/12/2024", "12/12/2024")]
